@@ -154,9 +154,9 @@ int32_t add(int32_t a, int32_t b){
  8000278:	6039      	str	r1, [r7, #0]
 
 	int32_t res;
-	__asm volatile("SVC #30");
+	__asm volatile("SVC #30");// triggers the svs handler with imm. value
  800027a:	df1e      	svc	30
-	__asm  volatile("MOV %0,R0": "=r"(res) ::);
+	__asm  volatile("MOV %0,R0": "=r"(res) ::);// this instruction moves the R0 value to the res variable
  800027c:	4603      	mov	r3, r0
  800027e:	60fb      	str	r3, [r7, #12]
 	return res;
@@ -249,7 +249,7 @@ int main(void)
     /* Loop forever */
     int32_t res;
 
-    res = add(40, -90);
+    res = add(40, -90);// (R0,R1)// calls the add functions arguments passed.
  80002ee:	f06f 0159 	mvn.w	r1, #89	; 0x59
  80002f2:	2028      	movs	r0, #40	; 0x28
  80002f4:	f7ff ffbc 	bl	8000270 <add>
@@ -304,7 +304,7 @@ int main(void)
 }
 __attribute ((naked)) void SVC_Handler(){
 
-	__asm volatile ("MRS R0, MSP");
+	__asm volatile ("MRS R0, MSP");// Reads the MSP base address and stores the value into R0
  8000350:	f3ef 8008 	mrs	r0, MSP
 	__asm volatile ("B SVC_Handler_c");
  8000354:	f000 b802 	b.w	800035c <SVC_Handler_c>
@@ -328,7 +328,7 @@ void SVC_Handler_c(uint32_t *pMSP_base_addr)
 	printf(" svc_handler triggered \n");
  8000364:	4823      	ldr	r0, [pc, #140]	; (80003f4 <SVC_Handler_c+0x98>)
  8000366:	f000 fa3f 	bl	80007e8 <puts>
-	uint8_t *pc_add = (uint8_t*)pMSP_base_addr[6];
+	uint8_t *pc_add = (uint8_t*)pMSP_base_addr[6];//
  800036a:	687b      	ldr	r3, [r7, #4]
  800036c:	3318      	adds	r3, #24
  800036e:	681b      	ldr	r3, [r3, #0]

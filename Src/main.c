@@ -25,8 +25,8 @@
 int32_t add(int32_t a, int32_t b){
 
 	int32_t res;
-	__asm volatile("SVC #30");
-	__asm  volatile("MOV %0,R0": "=r"(res) ::);
+	__asm volatile("SVC #30");// triggers the svs handler with imm. value
+	__asm  volatile("MOV %0,R0": "=r"(res) ::);// this instruction moves the R0 value to the res variable
 	return res;
 }
 int32_t sub(int32_t a, int32_t b){
@@ -58,7 +58,7 @@ int main(void)
     /* Loop forever */
     int32_t res;
 
-    res = add(40, -90);
+    res = add(40, -90);// (R0,R1)// calls the add functions arguments passed.
     printf("Add result = %ld\n",res);
 
     res = sub(25,150);
@@ -78,7 +78,7 @@ int main(void)
 }
 __attribute ((naked)) void SVC_Handler(){
 
-	__asm volatile ("MRS R0, MSP");
+	__asm volatile ("MRS R0, MSP");// Reads the MSP base address and stores the value into R0
 	__asm volatile ("B SVC_Handler_c");
 
 
@@ -90,13 +90,13 @@ void SVC_Handler_c(uint32_t *pMSP_base_addr)
 
 	int32_t arg0, arg1, res;
 	printf(" svc_handler triggered \n");
-	uint8_t *pc_add = (uint8_t*)pMSP_base_addr[6];
-	pc_add -=2;
-	uint8_t svs_number = *pc_add;
+	uint8_t *pc_add = (uint8_t*)pMSP_base_addr[6];//passing a PC stored address to another pointer
+	pc_add -=2;// decrementing the pc_add minus 2 to get the svc number
+	uint8_t svs_number = *pc_add;//dereferencing the pointer to svc number
 	printf("data %d", svs_number );
 
-	arg0 = pMSP_base_addr[0];
-	arg1 = pMSP_base_addr[1];
+	arg0 = pMSP_base_addr[0]; //now the R0 value passed to arg0
+	arg1 = pMSP_base_addr[1]; //now the R1 value passed to arg0
 	switch(svs_number)
 	{
 	case 30:
@@ -113,7 +113,7 @@ void SVC_Handler_c(uint32_t *pMSP_base_addr)
 		break;
 	default:
 	}
-	pMSP_base_addr[0]=res;
+	pMSP_base_addr[0]=res; //storing the processed data into R0.
 
 	//pMSP_base_addr[0]=svs_number;
 
